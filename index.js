@@ -37,6 +37,7 @@ async function run() {
         const foodCollection = client.db('HungryHaste').collection('foods');
         const cartCollection = client.db('HungryHaste').collection('carts');
         const orderCollection = client.db('HungryHaste').collection('orders');
+        const reviewCollection = client.db('HungryHaste').collection('reviews');
 
         /* ==================== USER ==================== */
         // User Data collect
@@ -287,6 +288,33 @@ async function run() {
         // Get Orders
         app.get('/orders', async (req, res) => {
             const result = await orderCollection.find().toArray();
+            res.send(result);
+        });
+
+        // Delete Specific shops
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        /* ==================== Review ==================== */
+        // Add a Review
+        app.post('/reviews', async (req, res) => {
+            const reviews = req.body;
+            const query = { foodId: reviews.foodId, email: reviews.email }
+            const exitingReview = await reviewCollection.findOne(query);
+            if (exitingReview) {
+                return res.send({ message: 'Product already reviewed' })
+            }
+            const result = await reviewCollection.insertOne(reviews);
+            res.send(result);
+        });
+
+        // Get reviews
+        app.get('/reviews', async (req, res) => {
+            const result = await reviewCollection.find().toArray();
             res.send(result);
         });
 
