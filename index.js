@@ -40,7 +40,7 @@ async function run() {
         const reviewCollection = client.db('HungryHaste').collection('reviews');
 
         /* ==================== USER ==================== */
-        // User Data collect
+        // User Data Post
         app.post('/users', async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
@@ -285,10 +285,16 @@ async function run() {
             })
         });
 
-        // Get Orders
+        // Get Orders with the latest one first
         app.get('/orders', async (req, res) => {
-            const result = await orderCollection.find().toArray();
-            res.send(result);
+            try {
+                // Find all orders, sort by _id in descending order
+                const result = await orderCollection.find().sort({ _id: -1 }).toArray();
+                res.send(result);
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
         });
 
         // Delete Specific shops
